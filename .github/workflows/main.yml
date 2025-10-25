@@ -1,0 +1,39 @@
+name: YouTube Checker
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"  
+  workflow_dispatch:        
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Restore last_videos.txt
+        uses: actions/cache@v4
+        with:
+          path: last_videos.txt
+          key: video-cache
+
+      - name: Run notifier
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+        run: python main.py
+
+      - name: Save last_videos.txt
+        uses: actions/cache/save@v4
+        with:
+          path: last_videos.txt
+          key: video-cache
